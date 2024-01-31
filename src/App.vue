@@ -1,21 +1,25 @@
 <template>
-  <div>
-    <nav>
-      <router-link to="/Courses"> Courses</router-link> 
-      <!-- |       <router-link to="/ACourse">A Course</router-link>  -->
-    </nav>
+  <div id="app">
+    <Header />
     <router-view />
+    <Footer />
   </div>
 </template>
 
 <script>
+import Header from '@/components/AppHeader.vue';
+import Footer from '@/components/AppFooter.vue';
 export default {
-  name: "App",
+  components: {
+    Header,
+    Footer,
+  },
 };
 </script>
 
 <style>
 #app {
+  background-image: url('~@/assets/background.jpg');
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

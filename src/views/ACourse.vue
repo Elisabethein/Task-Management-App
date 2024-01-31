@@ -1,37 +1,37 @@
 <template>
   <div class="ACourse">
-    <h2>{{ course ? course.coursename : "heh" }}</h2>
+    <h2>{{ this.course ? this.course.coursename : "heh" }}</h2>
 
     <!-- Table for displaying tasks -->
     <div v-if="tasks.length > 0">
-      <table class="task-table">
-        <thead>
-          <tr>
-            <th>Task Name</th>
-            <th>End Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="task in tasks" :key="task.id">
-            <td :style="{ 'text-decoration': task.crossedOut ? 'line-through' : 'none' }">
-              <span v-if="this.editing = false">{{ task.description }}</span>
-              <input v-else name="description" id="description" type="text" required v-model="task.description">
-            </td>
-            <td>
-              <span v-if="this.editing = false">{{ task.end_date }}</span>
-              <input v-else name="end_date" id="end_date" type="text" required v-model="task.end_date">
-            </td>
-            <td>
-              <button @click="crossOutTask(task)" :class="{ 'red': task.crossedOut }">Cross Out</button>
-              <button @click="deleteTask(task)">Delete</button>
-              <button @click="editTask()">Edit</button>
-              <button @click="updateTask(task.id, task)">Update</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <table class="task-table">
+    <thead>
+      <tr>
+        <th>Task Name</th>
+        <th>End Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="task in tasks" :key="task.id">
+        <td :style="{ 'text-decoration': task.crossedOut ? 'line-through' : 'none' }">
+          <span v-if="!editing">{{ task.description }}</span>
+          <input v-else name="description" id="description" type="text" required v-model="task.description">
+        </td>
+        <td>
+          <span v-if="!editing">{{ task.end_date }}</span>
+          <input v-else name="end_date" id="end_date" type="text" required v-model="task.end_date">
+        </td>
+        <td>
+          <button @click="crossOutTask(task)" :class="{ 'red': task.crossedOut }">Cross Out</button>
+          <button @click="deleteTask(task)">Delete</button>
+          <button @click="editTask()">Edit</button>
+          <button @click="updateTask(task.id, task)">Update</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
     <!-- Form for adding a new task -->
     <div>
@@ -51,6 +51,7 @@ export default {
   name: "ACourse",
   data() {
     return {
+      crossedOut: false,
       editing: false,
       course: null,
       courseId: null,
@@ -73,7 +74,6 @@ export default {
     },
     editTask() {
         this.editing = !this.editing;
-        window.location.reload();
     },
     updateTask(id, task) {
       fetch(`http://localhost:3000/api/tasks/${id}`, {
@@ -85,8 +85,7 @@ export default {
         })
           .then((response) => response.json())
           .then((data) => {
-            const index = this.tasks.findIndex((t) => t.id === task.id);
-            this.$set(this.tasks, index, data); // Update the local data
+            window.location.reload();
           })
           .catch((err) => console.log(err.message));
     },

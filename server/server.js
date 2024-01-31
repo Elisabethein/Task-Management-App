@@ -36,7 +36,7 @@ app.get('/auth/authenticate', async(req, res) => {
     try {
         if (token) { //checks if the token exists
             //jwt.verify(token, secretOrPublicKey, [options, callback]) verify a token
-            await jwt.verify(token, secret, (err) => { //token exists, now we try to verify it
+            jwt.verify(token, secret, (err) => {
                 if (err) { // not verified, redirect to login page
                     console.log(err.message);
                     console.log('token is not verified');
@@ -86,27 +86,39 @@ app.post('/auth/signup', async(req, res) => {
     }
 });
 
-app.post('/auth/login', async(req, res) => {
+app.post('/auth/login', async (req, res) => {
     try {
-        console.log("a login request has arrived");
-        const { email, password } = req.body;
-        const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-        if (user.rows.length === 0) return res.status(401).json({ error: "User is not registered" });
-        //Checking if the password is correct
-        const validPassword = await bcrypt.compare(password, user.rows[0].password);
-        //console.log("validPassword:" + validPassword);
-        if (!validPassword) return res.status(401).json({ error: "Incorrect password" });
-
-        const token = await generateJWT(user.rows[0].id);
-        res
-            .status(201)
-            .cookie('jwt', token, { maxAge: 6000000, httpOnly: true })
-            .json({ user_id: user.rows[0].id })
-            .send;
+      console.log("a login request has arrived");
+      const { email, password } = req.body;
+      const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+  
+      if (user.rows.length === 0) {
+        // User is not registered
+        return res.status(401).json({ error: "User is not registered" });
+      }
+  
+      // Checking if the password is correct
+      const validPassword = await bcrypt.compare(password, user.rows[0].password);
+      console.log("validPassword:" + validPassword);
+  
+      if (!validPassword) {
+        // Incorrect password
+        return res.status(401).json({ error: "Incorrect password" });
+      }
+  
+      const token = generateJWT(user.rows[0].id);
+  
+      // Set the cookies in the response
+      res.cookie("isAuthorized", true, { maxAge: 1000 * 60, httpOnly: true });
+      res.cookie('jwt', token, { maxAge: 6000000, httpOnly: true });
+  
+      // Send the user_id in the response
+      res.status(200).json({ user_id: user.rows[0].id });
     } catch (error) {
-        res.status(401).json({ error: error.message });
+      console.error(error.message);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+  });
 
 //logout a user = deletes the jwt
 app.get('/auth/logout', (req, res) => {
