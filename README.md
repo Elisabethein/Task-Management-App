@@ -19,6 +19,7 @@ The motivation behind creating the this app was to write a project that could le
 ## Features to be added
 - **Time Management:** Prioritize tasks and allocate time effectively for improved time management.
 - **User-based to-do lists:** Every user has their own subjects and task lists.
+- **Testing functionalities**
 - **Other simple functionalities** Fixing or optimizing existing functionalities and creating new ones.
 
 
