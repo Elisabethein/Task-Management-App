@@ -73,10 +73,10 @@
   </script>
   <style scoped>
   .header {
-    position: fixed;
+    position: relative;
     padding: 0.5em;
-    border: 1px solid darkcyan;
-    background-color: #D9F5F5;
+    border: 1px solid #ae5d6c;
+    background-color: #FADDE1;
     box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.75);
     width: 80%;
     border-radius: 5px;
@@ -96,7 +96,7 @@
     padding: 10px 15px;
     text-align: center;
     display: block;
-    color: dimgray;
+    color: #ae5d6c;
     font-size: 0.99em;
     text-decoration: none;
     border: none;
@@ -105,7 +105,7 @@
   }
   
   .nav-button:hover {
-    background-color: darkcyan;
+    background-color: #ae5d6c;
     color: white;
     border-radius: 25px;
   }

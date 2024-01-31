@@ -1,21 +1,21 @@
 <template>
   <div class = "main-page-section">
-    <h3>To do list for each subject</h3>
-    <div>
+    <h1>To do list for each subject</h1>
+    <div class = "add-course">
       <!-- Field for adding courses -->
       <input v-model="newCourseName" type="text" placeholder="Enter course name" />
-      <button @click="addCourse">Add Course</button>
+      <button @click="addCourse" class="addButton">Add Course</button>
     </div>
     <section class="courses-container">
-      <div v-for="course in courses" :key="course.id" class="course-card">
-        <router-link :to="{ name: 'ACourse', params: { id: course.id } }">
+      <router-link v-for="course in courses" :key="course.id" :to="{ name: 'ACourse', params: { id: course.id } }" class="course-card" :style="{ backgroundColor: getBackgroundColor(index) }">
+        <div class="course-text">
           <b>Course name:</b> {{ course.coursename }}<br>
           <b>Tasks:</b>
           <ul>
             <li v-for="task in course.tasks" :key="task.id">{{ task.description }}</li>
           </ul>
-        </router-link>
-      </div>
+        </div>
+      </router-link>
     </section>
   </div>
 </template>
@@ -76,6 +76,11 @@ export default {
         throw err;
       }
     },
+    getBackgroundColor() {
+    const colors = ["#FAE7EB","#F2D7E8","#ECF8F7","#B58EBC","#D8BBD3","#D1EDEA"];
+    const randomIndex = Math.floor(Math.random() * colors.length);
+    return colors[randomIndex];
+  },
   },
   mounted() {
     this.fetchRecords();
@@ -86,47 +91,77 @@ export default {
 
 
 <style scoped>
-
-h3 {
+h1, b {
   text-align: center;
-  color: rgb(8, 110, 110);
-}
-th {
-    background-color: lightpink;
-}
-th, td {
-  font-size: 15px;
-  margin-bottom: 5px;
-  padding: 8px 10px;
-}
-.container {
-    background: #d5d7d8;
-    box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
-    margin-bottom: 30px;
-    padding: 10px 20px;
-    margin: auto;
-    width: 60%;
-    justify-content: center;
+  color: #7d3541;
 }
 
-input {
-  margin-right: 10px;
+.course-card {
+  width: 300px; /* Adjust the width as needed based on your layout */
+  min-height: 200px;
+  margin-bottom: 20px;
+  border-radius: 10px; /* Add rounded corners */
+  overflow: hidden; /* Ensure rounded corners are applied */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  text-decoration: none; /* Remove default link styling */
+
 }
 
 .courses-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between; /* Adjust as needed */
-}
-
-.course-card {
-  width: 25%; /* Adjust the width as needed based on your layout */
-  margin-bottom: 20px;
+  gap: 10px; /* Add space between items */
 }
 
 .main-page-section {
-  max-width: 800px; /* Set your desired maximum width */
-  margin: auto; /* Center the element horizontally */
-  padding: 20px; /* Add padding for better spacing */
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden; /* Add overflow to contain floated children */
+}
+
+/* Add a clearfix to handle floated children */
+.main-page-section::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.addButton {
+  background-color: #ae5d6c;
+  color: white; /* Set text color for better visibility */
+}
+
+.add-course {
+  margin: 20px auto; /* Adjust the margin as needed */
+  padding: 10px;
+  border-radius: 8px; /* Optional: add rounded corners */
+  justify-content: space-between;
+}
+
+.course-link {
+  text-decoration: none;
+  color:#7d3541; /* Set the color for the course link */
+}
+
+input {
+  width: 80%;
+  margin-right: 30px;
+  margin-bottom: 20px; /* Add margin to the bottom of the input */
+}
+
+.course-text {
+  padding: 20px 10px 10px;
+  font-size: larger;
+  color:#7d3541;
+}
+
+.course-text li {
+  font-size: medium;
+}
+.course-text b {
+  font-size: 25px;
 }
 </style>

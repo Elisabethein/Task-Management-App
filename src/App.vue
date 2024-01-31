@@ -20,11 +20,15 @@ export default {
 <style>
 #app {
   background-image: url('~@/assets/background.jpg');
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  background-size: cover;  /* Ensures the background image covers the entire container */
+  background-position: center;  /* Centers the background image */
+  background-repeat: no-repeat;  /* Prevents the background image from repeating */
+  font-family: didot, serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  min-height: 100vh;
 }
 nav {
   padding: 30px;

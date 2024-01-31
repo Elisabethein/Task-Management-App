@@ -126,6 +126,70 @@ app.get('/auth/logout', (req, res) => {
     res.status(202).clearCookie('jwt').json({ "Msg": "cookie cleared" }).send
 });
 
+/*const getUserIdFromToken = (req) => {
+    const token = req.cookies.jwt;
+    console.log(token);
+    if (!token) {
+      // Token not provided
+      return null;
+    }
+  
+    try {
+      // Verify the token and extract the user ID
+      const decodedToken = jwt.verify(token, secret);
+      const userId = decodedToken.id;
+      return userId;
+    } catch (error) {
+      // Token verification failed
+      console.error('Token verification failed:', error.message);
+      return null;
+    }
+};
+
+app.get('/api/courses', async (req, res) => {
+    try {
+      console.log('A GET all courses request has arrived');
+      const userId = getUserIdFromToken(req);
+  
+      if (!userId) {
+        // User not authenticated
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+  
+      const courses = await pool.query(
+        'SELECT * FROM courses WHERE user_id = $1',
+        [userId]
+      );
+  
+      res.json(courses.rows);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+app.post('/api/courses', async (req, res) => {
+    try {
+      console.log('A POST new course request has arrived');
+      const { coursename } = req.body;
+      const userId = getUserIdFromToken(req);
+  
+      if (!userId) {
+        // User not authenticated
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+  
+      const newCourse = await pool.query(
+        'INSERT INTO courses (coursename, user_id) VALUES ($1, $2) RETURNING *',
+        [coursename, userId]
+      );
+  
+      res.status(201).json(newCourse.rows[0]);
+    } catch (err) {
+      console.error(err.message);
+      res.status(400).send(err.message);
+    }
+  });*/
 
 app.get('/api/courses', async(req, res) => {
     try {
@@ -155,16 +219,31 @@ app.post('/api/courses', async (req, res) => {
 
 app.get('/api/courses/:id', async(req, res) => {
     try {
-        console.log("Get a post with id request has arrived");
+        console.log("Get a course with id request has arrived");
         const { id } = req.params;
         const posts = await pool.query(
             "SELECT * FROM courses WHERE id = $1", [id]
         );
-        res.json(posts.rows);
+        res.json(posts.rows[0]);
     } catch (err) {
         console.error(err.message);
     }
 });
+
+app.delete('/api/courses/:id', async (req, res) => {
+    try {
+        console.log("A delete course request has arrived");
+        const { id } = req.params;
+    
+        await pool.query('DELETE FROM tasks WHERE courseid = $1', [id]);
+        await pool.query('DELETE FROM courses WHERE id = $1', [id]);
+  
+        res.json({ message: 'Course and associated tasks deleted successfully.' });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Internal Server Error');
+    }
+  });
 
 app.get('/api/tasks/:courseId', async (req, res) => {
     try {

@@ -26,7 +26,7 @@ const createTblQuery1 = `
     CREATE TABLE IF NOT EXISTS "courses" (
 	    "id" SERIAL PRIMARY KEY,         
 	    "coursename" VARCHAR(200) NOT NULL,
-        "userid" VARCHAR(200)
+        "user_id" VARCHAR(200)
     );`;
 
 const createTblQuery2 = `

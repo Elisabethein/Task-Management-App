@@ -1,15 +1,18 @@
 <template>
   <div class="ACourse">
-    <h2>{{ this.course ? this.course.coursename : "heh" }}</h2>
-
-    <!-- Table for displaying tasks -->
+    <div class="course-header">
+    <h1>{{ this.course ? this.course.coursename : "A course" }}</h1>
+    <button @click="deleteCourse(this.course.id)" class="delete-button">
+        <img src="@/assets/trash.png" alt="Delete Course">
+    </button>
+    </div>
     <div v-if="tasks.length > 0">
   <table class="task-table">
     <thead>
       <tr>
-        <th>Task Name</th>
-        <th>End Date</th>
-        <th>Actions</th>
+        <th class="task-description">Task Name</th>
+        <th class="task-end-date">End Date</th>
+        <th class="task-actions">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -34,7 +37,7 @@
 </div>
 
     <!-- Form for adding a new task -->
-    <div>
+    <div class="add-task">
       <label for="taskName">Task Name:</label>
       <input v-model="newTaskName" type="text" id="taskName" />
 
@@ -62,10 +65,21 @@ export default {
   },
   methods: {
     fetchInfo() {
-        fetch(`http://localhost:3000/api/courses/${this.courseId}`)
-        .then((response) => response.json())
-        .then((data) => (this.course = data))
-        .catch((err) => console.log(err.message));
+  fetch(`http://localhost:3000/api/courses/${this.courseId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      this.course = data;
+      console.log(this.course);
+    })
+    .catch((error) => {
+      console.error('Error fetching course info:', error);
+    });
+
 
       fetch(`http://localhost:3000/api/tasks/${this.courseId}`)
         .then((response) => response.json())
@@ -111,7 +125,7 @@ export default {
         description: this.newTaskName,
         end_date: this.newTaskEndDate,
       };
-      fetch(`http://localhost:3000/api/tasks`, {
+      fetch(`http://localhost:3000/api/tasks`, { 
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,6 +140,18 @@ export default {
         })
         .catch((err) => console.log(err.message));
     },
+    deleteCourse(courseid) {
+      fetch(`http://localhost:3000/api/courses/${courseid}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((response) => {
+          this.$router.push("/");
+        })
+        .catch((e) => {
+          console.log(e);
+        }); 
+    },
   },
   mounted() {
     this.courseId = this.$route.params.id;
@@ -134,20 +160,27 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .ACourse {
-  background-color: bisque;
   width: 60%;
   justify-content: center;
   margin: auto;
   padding: 10px;
+  color: #7d3541;
+  height: 100vh;
+}
+
+.course-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .task-table {
   width: 100%;
   margin-top: 20px;
   border-collapse: collapse;
+  margin-bottom: 20px;
 }
 
 .task-table th, .task-table td {
@@ -157,14 +190,53 @@ export default {
 }
 
 .task-table th {
-  background-color: #f2f2f2;
+  background-color: #FADDE1;
 }
 
-.red {
-  background-color: red;
+button {
+  margin-right: 8px;
+  padding: 6px 10px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  background-color: #ae5d6c; /* Set the desired background color */
+  transition: background-color 0.3s ease; /* Add a smooth transition effect */
+}
+
+button:hover {
+  background-color: #7d3541; /* Change the background color on hover */
+}
+
+.task-table .red {
+  background-color: rgb(145, 53, 53);
+}
+
+.task-description {
+  width: 35%; /* Adjust the width of the task description column */
+}
+
+.task-end-date {
+  width: 15%; /* Adjust the width of the end date column */
 }
 
 .crossed-out {
   text-decoration: line-through;
+}
+.add-task input{
+  margin-right: 60px; /* Add margin between the input fields */
+  margin-bottom: 20px;
+  min-width: 200px;
+}
+
+.delete-button img{
+  height: 30px;
+  width: 30px;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 </style>

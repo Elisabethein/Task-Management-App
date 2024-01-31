@@ -108,18 +108,10 @@
   </script>
   
   <style scoped>
-  * {
+   * {
     font-family: monaco, Consolas, Lucida Console, monospace;
     font-size: 16px;
-  }
-  
-  body {
-    margin: 0;
-    padding-bottom: 1000px;
-    background-color: #f0f0f0; /* Replace 'your-image-url.jpg' with the URL of your image */ /* Prevent image from repeating */
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-size: cover;
+    color: #7d3541;
   }
   
   p.single {
@@ -131,10 +123,11 @@
   .container {
     padding: 10px 10px 10px;
     max-width: 600px;
-    margin: 90px auto 75px;
+    margin: 40px auto 75px;
     background-color: #D1DEDE;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #FADDE1;
   }
   
   section {
@@ -143,11 +136,11 @@
   }
   
   .links {
-    color: #007BFF;
+    color: #7d3541;
   }
   
   .links:hover {
-    color: #0056b3;
+    color: #ae5d6c;
   }
   
   .login-form {
@@ -173,7 +166,7 @@
   
   button {
     padding: 10px;
-    background-color: navy;
+    background-color: #7d3541;
     color: #fff;
     border: none;
     cursor: pointer;
@@ -182,12 +175,12 @@
   }
   
   button:hover {
-    background-color: #0056b3;
+    background-color: #ae5d6c;
   }
   
   .password-validation p, .password-validation li {
     margin-top: 10px;
-    color: red;
+    color: rgb(227, 84, 84);
     font-size: 11px;
     text-align: justify;
   }

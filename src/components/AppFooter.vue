@@ -22,10 +22,10 @@
     justify-content: center;
     padding-top: 0.1em;
     padding-bottom: 0.1em;
-    background-color: #D9F5F5;
-    border: 1px darkcyan;
+    background-color: #FADDE1;
+    border: 1px #ae5d6c;
     box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.75);
-    position: fixed;
+    position: relative;
     left: 0;
     bottom: 0;
     width: 80%;
@@ -34,7 +34,7 @@
     opacity: 95%;
   }
   .footer-text {
-    color: dimgray;
+    color: #ae5d6c;
   }
   </style>
   
