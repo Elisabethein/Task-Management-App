@@ -1,5 +1,5 @@
 <template>
-    <body>
+  <body>
     <section>
       <div class="container">
         <p class="single"><br>Create a new account</p>
@@ -25,6 +25,11 @@
           </div>
   
           <button type="submit" :disabled="!isPasswordValid">Signup</button>
+          
+          <!-- Display error message if email is already taken -->
+          <div v-if="signupError" class="signup-error">
+            {{ signupError }}
+          </div>
         </form>
         <p>
           Already have an account?
@@ -32,80 +37,90 @@
         </p>
       </div>
     </section>
-    </body>
-  </template>
-  
-  <script>
-  export default {
-    name: "SignUp",
-    data() {
-      return {
-        email: '',
-        password: '',
-        isPasswordValid: true, // Initialize to true by default
-        shaking: false,
-        passwordRequirements: [
-          {name: 'at least 8 characters', regex: /^.{8,14}$/},
-          {name: 'at least one uppercase character', regex: /^(?=.*[A-Z])/},
-          {name: 'at least two lowercase characters', regex: /^(?=.*[a-z].*[a-z])/},
-          {name: 'at least one numeric value', regex: /^(?=.*\d)/},
-          {name: 'start with an uppercase character', regex: /^[A-Z].*/},
-          {name: 'include the character “_"', regex: /^(?=.*_)/},
-        ],
-      };
+  </body>
+</template>
+
+<script>
+import { mapActions } from 'vuex';
+
+export default {
+  name: "SignUp",
+  data() {
+    return {
+      email: '',
+      password: '',
+      isPasswordValid: true,
+      shaking: false,
+      passwordRequirements: [
+        {name: 'at least 8 characters', regex: /^.{8,14}$/},
+        {name: 'at least one uppercase character', regex: /^(?=.*[A-Z])/},
+        {name: 'at least two lowercase characters', regex: /^(?=.*[a-z].*[a-z])/},
+        {name: 'at least one numeric value', regex: /^(?=.*\d)/},
+        {name: 'start with an uppercase character', regex: /^[A-Z].*/},
+        {name: 'include the character “_"', regex: /^(?=.*_)/},
+      ],
+      signupError: null, // Added for error handling
+    };
+  },
+  methods: {
+    ...mapActions(['loginUser']),
+    validatePassword() {
+      for (const requirement of this.passwordRequirements) {
+        requirement.isValid = requirement.regex.test(this.password);
+      }
+      this.isPasswordValid = this.passwordRequirements.every(requirement => requirement.isValid);
     },
-    methods: {
-      validatePassword() {
-        for (const requirement of this.passwordRequirements) {
-          requirement.isValid = requirement.regex.test(this.password);
-        }
-        this.isPasswordValid = this.passwordRequirements.every(requirement => requirement.isValid);
-      }, async SignUp() {
-        try {
-          this.validatePassword();
-          if (this.isPasswordValid) {
-            var data = {
-              email: this.email,
-              password: this.password,
-            };
-            // using Fetch - post method - send an HTTP post request to the specified URI with the defined body
-            const response = await fetch("http://localhost:3000/auth/signup", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              credentials: "include", // Don't forget to specify this if you need cookies
-              body: JSON.stringify(data),
-            });
-  
-            const responseData = await response.json();
-  
-            console.log(responseData);
+    async SignUp() {
+      try {
+        this.signupError = null; // Reset error on each signup attempt
+        this.validatePassword();
+        if (this.isPasswordValid) {
+          var data = {
+            email: this.email,
+            password: this.password,
+          };
+
+          const response = await fetch("http://localhost:3000/auth/signup", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(data),
+          });
+
+          const responseData = await response.json();
+          
+          if (response.ok) {
+            await this.loginUser(responseData.user_id);
             this.$router.push("/");
           } else {
-            console.log("Password is not valid. Please check the requirements and try again.");
+            // Handle signup error
+            this.signupError = responseData.error;
           }
-        } catch (e) {
-          if (e.message === "The string did not match the expected pattern.") {
-            this.shake();
-            console.log("siin")
-          }
-          console.error(e.message);
-          console.log("error");
+        } else {
+          console.log("Password is not valid. Please check the requirements and try again.");
         }
-      },
-      shake() {
-        this.shaking = true;
-        setTimeout(() => {
-          this.shaking = false;
-        }, 300);
-      },
+      } catch (e) {
+        if (e.message === "The string did not match the expected pattern.") {
+          this.shake();
+        }
+        console.error(e.message);
+        console.log("error");
+      }
     },
-    watch: {
-      password: 'validatePassword',
+    shake() {
+      this.shaking = true;
+      setTimeout(() => {
+        this.shaking = false;
+      }, 300);
     },
-  };
-  </script>
+  },
+  watch: {
+    password: 'validatePassword',
+  },
+};
+</script>
   
   <style scoped>
    * {
@@ -206,6 +221,12 @@
       transform: translate3d(4px, 0, 0);
     }
   }
+
+  .signup-error {
+  color: rgb(227, 84, 84);
+  font-size: 12px;
+  padding-top: 10px;
+}
   
   </style>
   

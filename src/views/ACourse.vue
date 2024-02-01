@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr v-for="task in tasks" :key="task.id">
-        <td :style="{ 'text-decoration': task.crossedOut ? 'line-through' : 'none' }">
+        <td :style="{ 'text-decoration': task.crossedout ? 'line-through' : 'none' }">
           <span v-if="!editing">{{ task.description }}</span>
           <input v-else name="description" id="description" type="text" required v-model="task.description">
         </td>
@@ -54,7 +54,6 @@ export default {
   name: "ACourse",
   data() {
     return {
-      crossedOut: false,
       editing: false,
       course: null,
       courseId: null,
@@ -74,7 +73,6 @@ export default {
     })
     .then((data) => {
       this.course = data;
-      console.log(this.course);
     })
     .catch((error) => {
       console.error('Error fetching course info:', error);
@@ -104,7 +102,24 @@ export default {
           .catch((err) => console.log(err.message));
     },
     crossOutTask(task) {
-      task.crossedOut = !task.crossedOut;
+      task.crossedout = !task.crossedout;
+      fetch(`http://localhost:3000/api/tasks/${task.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: task.id,
+          description: task.description,
+          end_date: task.end_date,
+          crossedOut: task.crossedout,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Task status updated on the server:", data);
+        })
+        .catch((err) => console.log(err.message));
     },
     deleteTask(task) {
       fetch(`http://localhost:3000/api/tasks/${task.id}`, {
@@ -141,7 +156,7 @@ export default {
         .catch((err) => console.log(err.message));
     },
     deleteCourse(courseid) {
-      fetch(`http://localhost:3000/api/courses/${courseid}`, {
+      fetch(`http://localhost:3000/api/course/${courseid}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       })
@@ -160,6 +175,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .ACourse {
   width: 60%;
@@ -219,9 +235,6 @@ button:hover {
   width: 15%; /* Adjust the width of the end date column */
 }
 
-.crossed-out {
-  text-decoration: line-through;
-}
 .add-task input{
   margin-right: 60px; /* Add margin between the input fields */
   margin-bottom: 20px;

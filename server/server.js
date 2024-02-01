@@ -59,137 +59,63 @@ app.get('/auth/authenticate', async(req, res) => {
 
 // signup a user
 app.post('/auth/signup', async(req, res) => {
-    try {
-        console.log("a signup request has arrived");
-        //console.log(req.body);
-        const { email, password } = req.body;
+  try {
+      console.log("A signup request has arrived");
+      const { email, password } = req.body;
 
-        const salt = await bcrypt.genSalt(); //  generates the salt, i.e., a random string
-        const bcryptPassword = await bcrypt.hash(password, salt) // hash the password and the salt 
-        const authUser = await pool.query( // insert the user and the hashed password into the database
-            "INSERT INTO users(email, password) values ($1, $2) RETURNING*", [email, bcryptPassword]
-        );
-        console.log(authUser.rows[0].id);
-        const token = await generateJWT(authUser.rows[0].id); // generates a JWT by taking the user id as an input (payload)
-        console.log(token);
-        res.cookie("isAuthorized", true, { maxAge: 1000 * 60, httpOnly: true });
-        res.cookie('jwt', token, { maxAge: 6000000, httpOnly: true });
-        res
-            .status(201)
-            .cookie('jwt', token, { maxAge: 6000000, httpOnly: true })
-            .json({ user_id: authUser.rows[0].id })
-            .send;
-    } catch (err) {
-        console.error(err);
-        console.error(err.message);
-        res.status(400).send(err.message);
-    }
+      // Check if the email is already registered
+      const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+      if (existingUser.rows.length > 0) {
+          return res.status(400).json({ error: "Email is already taken" });
+      }
+
+      const salt = await bcrypt.genSalt();
+      const bcryptPassword = await bcrypt.hash(password, salt);
+      const authUser = await pool.query(
+          "INSERT INTO users(email, password) values ($1, $2) RETURNING*", [email, bcryptPassword]
+      );
+
+      const token = await generateJWT(authUser.rows[0].id);
+      res.cookie("isAuthorized", true, { maxAge: 1000 * 60, httpOnly: true });
+      res.cookie('jwt', token, { maxAge: 6000000, httpOnly: true });
+      res
+          .status(201)
+          .cookie('jwt', token, { maxAge: 6000000, httpOnly: true })
+          .json({ user_id: authUser.rows[0].id })
+          .send;
+  } catch (err) {
+      console.error(err);
+      console.error(err.message);
+      res.status(400).send(err.message);
+  }
 });
 
-app.post('/auth/login', async (req, res) => {
-    try {
+app.post('/auth/login', async(req, res) => {
+  try {
       console.log("a login request has arrived");
       const { email, password } = req.body;
       const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-  
-      if (user.rows.length === 0) {
-        // User is not registered
-        return res.status(401).json({ error: "User is not registered" });
-      }
-  
-      // Checking if the password is correct
+      if (user.rows.length === 0) return res.status(401).json({ error: "User is not registered" });
+
       const validPassword = await bcrypt.compare(password, user.rows[0].password);
-      console.log("validPassword:" + validPassword);
-  
-      if (!validPassword) {
-        // Incorrect password
-        return res.status(401).json({ error: "Incorrect password" });
-      }
-  
+      if (!validPassword) return res.status(401).json({ error: "Incorrect password" });
+
       const token = generateJWT(user.rows[0].id);
-  
-      // Set the cookies in the response
-      res.cookie("isAuthorized", true, { maxAge: 1000 * 60, httpOnly: true });
-      res.cookie('jwt', token, { maxAge: 6000000, httpOnly: true });
-  
-      // Send the user_id in the response
-      res.status(200).json({ user_id: user.rows[0].id });
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
+      res
+          .status(201)
+          .cookie('jwt', token, { maxAge: 6000000, httpOnly: true })
+          .json({ user_id: user.rows[0].id })
+          .send;
+  } catch (error) {
+      res.status(401).json({ error: error.message });
+  }
+});
 
 //logout a user = deletes the jwt
 app.get('/auth/logout', (req, res) => {
     console.log('delete jwt request arrived');
     res.status(202).clearCookie('jwt').json({ "Msg": "cookie cleared" }).send
 });
-
-/*const getUserIdFromToken = (req) => {
-    const token = req.cookies.jwt;
-    console.log(token);
-    if (!token) {
-      // Token not provided
-      return null;
-    }
-  
-    try {
-      // Verify the token and extract the user ID
-      const decodedToken = jwt.verify(token, secret);
-      const userId = decodedToken.id;
-      return userId;
-    } catch (error) {
-      // Token verification failed
-      console.error('Token verification failed:', error.message);
-      return null;
-    }
-};
-
-app.get('/api/courses', async (req, res) => {
-    try {
-      console.log('A GET all courses request has arrived');
-      const userId = getUserIdFromToken(req);
-  
-      if (!userId) {
-        // User not authenticated
-        return res.status(401).json({ error: 'User not authenticated' });
-      }
-  
-      const courses = await pool.query(
-        'SELECT * FROM courses WHERE user_id = $1',
-        [userId]
-      );
-  
-      res.json(courses.rows);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
-
-app.post('/api/courses', async (req, res) => {
-    try {
-      console.log('A POST new course request has arrived');
-      const { coursename } = req.body;
-      const userId = getUserIdFromToken(req);
-  
-      if (!userId) {
-        // User not authenticated
-        return res.status(401).json({ error: 'User not authenticated' });
-      }
-  
-      const newCourse = await pool.query(
-        'INSERT INTO courses (coursename, user_id) VALUES ($1, $2) RETURNING *',
-        [coursename, userId]
-      );
-  
-      res.status(201).json(newCourse.rows[0]);
-    } catch (err) {
-      console.error(err.message);
-      res.status(400).send(err.message);
-    }
-  });*/
 
 app.get('/api/courses', async(req, res) => {
     try {
@@ -203,13 +129,33 @@ app.get('/api/courses', async(req, res) => {
     }
 });
 
+app.get('/api/courses/:userId', async(req, res) => {
+  try {
+      console.log("A GET user's courses request has arrived");
+      const { userId } = req.params;
+      const course = await pool.query(
+          "SELECT * FROM courses where userid = $1", [userId]
+      );
+      res.json(course.rows);
+  } catch (err) {
+      console.error(err.message);
+  }
+});
+
 app.post('/api/courses', async (req, res) => {
-    try {
-    console.log("A POST  new course request has arrived");
-      const { coursename } = req.body;
+  try {
+      console.log("A POST  new course request has arrived");
+      const { coursename, userId } = req.body;
+      console.log(coursename);
+      console.log(userId);
+        // Validate user ID
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
       const newCourse = await pool.query(
-        'INSERT INTO courses (coursename) VALUES ($1) RETURNING *',
-        [coursename]
+        'INSERT INTO courses (coursename, userid) VALUES ($1, $2) RETURNING *',
+        [coursename, userId]
       );
       res.status(201).json(newCourse.rows[0]);
     } catch (err) {
@@ -217,7 +163,7 @@ app.post('/api/courses', async (req, res) => {
     }
   });
 
-app.get('/api/courses/:id', async(req, res) => {
+app.get('/api/course/:id', async(req, res) => {
     try {
         console.log("Get a course with id request has arrived");
         const { id } = req.params;
@@ -262,8 +208,8 @@ app.post('/api/tasks', async (req, res) => {
         console.log("A post new task request has arrived");
         const { courseid, description, end_date } = req.body;
         const newTask = await pool.query(
-            'INSERT INTO tasks (courseid, description, end_date) VALUES ($1, $2, $3) RETURNING *',
-            [courseid, description, end_date]
+            'INSERT INTO tasks (courseid, description, end_date, crossedOut) VALUES ($1, $2, $3, $4) RETURNING *',
+            [courseid, description, end_date, false]
         );
 
         res.json(newTask.rows[0]);
@@ -274,19 +220,32 @@ app.post('/api/tasks', async (req, res) => {
 });
 
 app.put('/api/tasks/:id', async (req, res) => {
-    try {
-        console.log("An update task request has arrived");
-        const { id } = req.params;
-        const { description, end_date } = req.body;
-        const updatedTask = await pool.query(
-            'UPDATE tasks SET description = $1, end_date = $2 WHERE id = $3 RETURNING *',
-            [description, end_date, id]
-        );
-        res.json(updatedTask.rows[0]);
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).send('Internal Server Error');
-    }
+  try {
+      console.log("An update task request has arrived");
+      const { id } = req.params;
+      const { description, end_date, crossedOut } = req.body;
+
+      let updatedTask;
+
+      if (crossedOut !== undefined) {
+          // If crossedOut property is provided, update it along with description and end_date
+          updatedTask = await pool.query(
+              'UPDATE tasks SET description = $1, end_date = $2, crossedOut = $3 WHERE id = $4 RETURNING *',
+              [description, end_date, crossedOut, id]
+          );
+      } else {
+          // If crossedOut property is not provided, update only description and end_date
+          updatedTask = await pool.query(
+              'UPDATE tasks SET description = $1, end_date = $2 WHERE id = $3 RETURNING *',
+              [description, end_date, id]
+          );
+      }
+
+      res.json(updatedTask.rows[0]);
+  } catch (error) {
+      console.error(error.message);
+      res.status(500).send('Internal Server Error');
+  }
 });
 
 app.delete('/api/tasks/:id', async (req, res) => {

@@ -26,7 +26,7 @@ const createTblQuery1 = `
     CREATE TABLE IF NOT EXISTS "courses" (
 	    "id" SERIAL PRIMARY KEY,         
 	    "coursename" VARCHAR(200) NOT NULL,
-        "user_id" VARCHAR(200)
+        "userid" VARCHAR(200)
     );`;
 
 const createTblQuery2 = `
@@ -41,7 +41,8 @@ const createTblQuery = `
 	    id SERIAL PRIMARY KEY,         
 	    courseid INTEGER NOT NULL,
         description VARCHAR(250) NOT NULL,
-        end_date VARCHAR(200)
+        end_date VARCHAR(200),
+        crossedOut boolean NOT NULL
     );`;
 
 // Execute each CREATE TABLE statement in a separate transaction

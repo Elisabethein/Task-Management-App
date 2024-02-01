@@ -14,6 +14,7 @@ const routes = [
     beforeEnter: async (to, from, next) => {
       console.log('beforeEnter guard triggered for Home');
       let authResult = await auth.authenticated();
+      console.log('authResult:', authResult);
       if (!authResult) {
         console.log('User not authenticated, redirecting to login');
         next('/login');

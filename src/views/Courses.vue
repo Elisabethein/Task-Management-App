@@ -7,12 +7,14 @@
       <button @click="addCourse" class="addButton">Add Course</button>
     </div>
     <section class="courses-container">
-      <router-link v-for="course in courses" :key="course.id" :to="{ name: 'ACourse', params: { id: course.id } }" class="course-card" :style="{ backgroundColor: getBackgroundColor(index) }">
+      <router-link v-for="course in courses" :key="course.id" :to="{ name: 'ACourse', params: { id: course.id } }" class="course-card" :style="{ backgroundColor: getBackgroundColor() }">
         <div class="course-text">
           <b>Course name:</b> {{ course.coursename }}<br>
           <b>Tasks:</b>
           <ul>
-            <li v-for="task in course.tasks" :key="task.id">{{ task.description }}</li>
+            <li v-for="task in course.tasks" :key="task.id" :style="{ 'text-decoration': task.crossedout ? 'line-through' : 'none' }">
+              {{ task.description }}
+            </li>
           </ul>
         </div>
       </router-link>
@@ -22,6 +24,8 @@
 
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: "Courses",
   data() {
@@ -30,10 +34,14 @@ export default {
       newCourseName: "", // New property for the input field
     };
   },
+  computed: {
+    ...mapGetters(['getUser']),
+  },
   methods: {
     async fetchRecords() {
     try {
-        const response = await fetch(`http://localhost:3000/api/courses`);
+        const userId = this.$store.state.user;
+        const response = await fetch(`http://localhost:3000/api/courses/${userId}`);
         const data = await response.json();
 
         for (const course of data) {
@@ -51,12 +59,15 @@ export default {
         return;
       }
 
+      const userId = this.$store.state.user;
+      console.log(userId);
+
       fetch(`http://localhost:3000/api/courses`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ coursename: this.newCourseName }),
+        body: JSON.stringify({ coursename: this.newCourseName, userId: userId }),
       })
         .then((response) => response.json())
         .then(async (data) => {

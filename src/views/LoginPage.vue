@@ -3,7 +3,7 @@
     <section>
       <div class="container">
         <p class="single"><br>Login</p>
-        <form class="login-form">
+        <form class="login-form" @submit.prevent="LogIn">
           <label>
             Email
             <input v-model="email" type="text" placeholder="Email" required/>
@@ -26,7 +26,9 @@
   
     </body>
   </template>
+
   <script>
+  import { mapActions } from 'vuex';
   
   export default {
     name: 'LoginPage',
@@ -37,7 +39,9 @@
         loginError: false,
       };
     }, methods: {
+      ...mapActions(['loginUser']),
       async LogIn() {
+        console.log("LogIn method is called");
         if (!this.email || !this.password) {
           console.log("Please fill in all required fields.");
           return;
@@ -47,6 +51,7 @@
           email: this.email,
           password: this.password,
         };
+        
   
         try {
           const response = await fetch("http://localhost:3000/auth/login", {
@@ -59,9 +64,13 @@
           });
   
           if (response.ok) {
+            const responseData = await response.json();
             console.log("Authentication successful");
-            // const user_id = responseData.user_id;
-            this.$router.push("/");
+
+            await this.loginUser(responseData.user_id);
+
+            this.$router.push("/courses");
+            console.log("Navigating to /courses");
           } else {
             console.log("Authentication failed");
             this.loginError = true;

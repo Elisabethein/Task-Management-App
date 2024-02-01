@@ -11,14 +11,14 @@ The motivation behind creating the this app was to write a project that could le
 ## Key Features
 
 - **Subject-Based Task Lists:** Create and manage separate to-do lists for different subjects or courses.
-- **Task Details:** Add or edit detailed descriptions and due dates to each task.
+- **Task Details:** Add or edit detailed descriptions and due dates to each task, cross out task taht are done or delete them.
 - **Task Status Tracking:** Keep track of task completion status and mark tasks as done when finished.
 - **User-Friendly Interface:** A clean and intuitive user interface for a seamless experience.
 - **Login function:** Create a user before accessing the courses.
+- **User-based to-do lists:** Every user has their own subjects and task lists.
 
 ## Features to be added
 - **Time Management:** Prioritize tasks and allocate time effectively for improved time management.
-- **User-based to-do lists:** Every user has their own subjects and task lists.
 - **Testing functionalities**
 - **Other simple functionalities** Fixing or optimizing existing functionalities and creating new ones.
 
