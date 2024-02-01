@@ -2,8 +2,8 @@ const Pool = require('pg').Pool;
 
 const pool = new Pool({
     user: "postgres",
-    password: "sql", // Enter your password here
-    database: "taskManagement", //Try to use the same name for your database
+    password: "sql",
+    database: "taskManagement",
     host: "localhost",
     port: "5432"
 });
@@ -11,9 +11,9 @@ const pool = new Pool({
 
 const execute = async(query1, query2, query3) => {
     try {
-        await pool.connect(); // gets connection
-        await pool.query(query1); // sends queries
-        await pool.query(query2); // sends queries
+        await pool.connect();
+        await pool.query(query1);
+        await pool.query(query2);
         await pool.query(query3);
         return true;
     } catch (error) {
@@ -45,36 +45,11 @@ const createTblQuery = `
         crossedOut boolean NOT NULL
     );`;
 
-// Execute each CREATE TABLE statement in a separate transaction
+
 execute(createTblQuery1, createTblQuery, createTblQuery2).then(result => {
     if (result) {
         console.log('If does not exist, tables are created');
     }
 });
- 
-
-const execute2 = async (query) => {
-    try {
-        await pool.query(query);
-        return true;
-    } catch (error) {
-        console.error(error.stack);
-        return false;
-    }
-};
-
-process.on('SIGINT', async () => {
-    console.log('Process interrupted. Cleaning up...');
-    try {
-        // Cleanup: Drop tables if they exist
-        await execute2('DROP TABLE IF EXISTS "tasks" CASCADE;');
-    } catch (error) {
-        console.error('Error during cleanup:', error);
-    } finally {
-        await pool.end(); // Close the pool before exiting
-        process.exit(); // Exit the process
-    }
-});
-
 
 module.exports = pool;

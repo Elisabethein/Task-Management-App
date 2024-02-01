@@ -16,12 +16,11 @@ app.use(cors({ origin: 'http://localhost:8080', credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-const secret = "gdgdhdbcb770785rgdzqws"; // use a stronger secret
-const maxAge = 60 * 60; //unlike cookies, the expiresIn in jwt token is calculated by seconds not milliseconds
+const secret = "gdgdhdbcb770785rgdzqws";
+const maxAge = 60 * 60;
 
 const generateJWT = (id) => {
     return jwt.sign({ id }, secret, { expiresIn: maxAge })
-        //jwt.sign(payload, secret, [options, callback]), and it returns the JWT as string
 }
 
 app.listen(port, () => {
@@ -32,14 +31,14 @@ const nodemailer = require('nodemailer');
 
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Use your email service provider
+  service: 'gmail',
   auth: {
-    user: 'taskmanagementapp24@gmail.com',
+    user: '',
     pass: 'jbey gjnj qpkd zcdg',
   },
 });
 
-
+//Password rest mail sending
 app.post('/auth/reset-password', async (req, res) => {
     try {
       const { email } = req.body;
@@ -49,7 +48,7 @@ app.post('/auth/reset-password', async (req, res) => {
   
       const resetLink = `http://localhost:8080/auth/reset-password/${token}`;
         const mailOptions = {
-        from: 'taskmanagementapp24@gmail.com', // Replace with your email address
+        from: '',
         to: email,
         subject: 'Password Reset',
         text: `Click the following link to reset your password: ${resetLink}`,
@@ -68,61 +67,55 @@ app.post('/auth/reset-password', async (req, res) => {
       console.error(error.message);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  });
+});
 
-  app.post('/auth/reset-password/:token', async (req, res) => {
+//Updating password
+app.post('/auth/reset-password/:token', async (req, res) => {
     try {
-      const { token } = req.params;
-      const { newPassword } = req.body;
-  
-      // Validate the token
-      if (!passwordResetTokens.has(token) || passwordResetTokens.get(token).used) {
+        const { token } = req.params;
+        const { newPassword } = req.body;
+        // Validate the token
+        if (!passwordResetTokens.has(token) || passwordResetTokens.get(token).used) {
         return res.status(400).json({ error: 'Invalid or expired token.' });
-      }
-  
-      const email = passwordResetTokens.get(token);
-  
-      // Hash the new password
-      const salt = await bcrypt.genSalt();
-      const hashedPassword = await bcrypt.hash(newPassword, salt);
-  
-      // Update the user's password in the database
-      await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
-  
-      // Remove the token from the map after it's used
-      passwordResetTokens.set(token, { email, used: true });
-  
-      res.status(200).json({ message: 'Password reset successful.' });
+        }
+        const email = passwordResetTokens.get(token);
+        // Hash the new password
+        const salt = await bcrypt.genSalt();
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        //Update password
+        await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email.email]);
+        //Set token used
+        passwordResetTokens.set(token, { email, used: true });
+        console.log('Password changed successfully');
+        res.status(200).json({ message: 'Password reset successful.' });
     } catch (error) {
-      console.error(error.message);
-      res.status(500).json({ error: 'Internal Server Error' });
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-  });
+});
   
 
-// is used to check whether a user is authinticated
+// is used to check whether a user is authenticated
 app.get('/auth/authenticate', async(req, res) => {
     console.log('authentication request has been arrived');
-    const token = req.cookies.jwt; // assign the token named jwt to the token const
-    //console.log("token " + token);
+    const token = req.cookies.jwt;
     let authenticated = false; // a user is not authenticated until proven the opposite
     try {
-        if (token) { //checks if the token exists
-            //jwt.verify(token, secretOrPublicKey, [options, callback]) verify a token
+        if (token) {
             jwt.verify(token, secret, (err) => {
                 if (err) { // not verified, redirect to login page
                     console.log(err.message);
                     console.log('token is not verified');
-                    res.send({ "authenticated": authenticated }); // authenticated = false
+                    res.send({ "authenticated": authenticated });
                 } else { // token exists and it is verified 
                     console.log('author is authenticated');
                     authenticated = true;
-                    res.send({ "authenticated": authenticated }); // authenticated = true
+                    res.send({ "authenticated": authenticated });
                 }
             })
         } else { //applies when the token does not exist
             console.log('author is not authenticated');
-            res.send({ "authenticated": authenticated }); // authenticated = false
+            res.send({ "authenticated": authenticated });
         }
     } catch (err) {
         console.error(err.message);
@@ -135,19 +128,16 @@ app.post('/auth/signup', async(req, res) => {
   try {
       console.log("A signup request has arrived");
       const { email, password } = req.body;
-
       // Check if the email is already registered
       const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
       if (existingUser.rows.length > 0) {
           return res.status(400).json({ error: "Email is already taken" });
       }
-
       const salt = await bcrypt.genSalt();
       const bcryptPassword = await bcrypt.hash(password, salt);
       const authUser = await pool.query(
           "INSERT INTO users(email, password) values ($1, $2) RETURNING*", [email, bcryptPassword]
       );
-
       const token = await generateJWT(authUser.rows[0].id);
       res.cookie("isAuthorized", true, { maxAge: 1000 * 60, httpOnly: true });
       res.cookie('jwt', token, { maxAge: 6000000, httpOnly: true });
@@ -163,6 +153,7 @@ app.post('/auth/signup', async(req, res) => {
   }
 });
 
+//login an existing user
 app.post('/auth/login', async(req, res) => {
   try {
       console.log("a login request has arrived");
@@ -190,6 +181,7 @@ app.get('/auth/logout', (req, res) => {
     res.status(202).clearCookie('jwt').json({ "Msg": "cookie cleared" }).send
 });
 
+//get all courses, not used when user-based
 app.get('/api/courses', async(req, res) => {
     try {
         console.log("A GET all courses request has arrived");
@@ -202,6 +194,7 @@ app.get('/api/courses', async(req, res) => {
     }
 });
 
+//get user's courses
 app.get('/api/courses/:userId', async(req, res) => {
   try {
       console.log("A GET user's courses request has arrived");
@@ -215,6 +208,21 @@ app.get('/api/courses/:userId', async(req, res) => {
   }
 });
 
+//get a course based on its id
+app.get('/api/course/:courseId', async(req, res) => {
+    try {
+        console.log("A GET course info request has arrived");
+        const { courseId } = req.params;
+        const course = await pool.query(
+            "SELECT * FROM courses where id = $1", [courseId]
+        );
+        res.json(course.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+//insert a new course for user
 app.post('/api/courses', async (req, res) => {
   try {
       console.log("A POST  new course request has arrived");
@@ -234,8 +242,9 @@ app.post('/api/courses', async (req, res) => {
     } catch (err) {
       console.error(err.message);
     }
-  });
+});
 
+//select a course based on id
 app.get('/api/course/:id', async(req, res) => {
     try {
         console.log("Get a course with id request has arrived");
@@ -249,6 +258,7 @@ app.get('/api/course/:id', async(req, res) => {
     }
 });
 
+//delete a course and all tasks in it
 app.delete('/api/courses/:id', async (req, res) => {
     try {
         console.log("A delete course request has arrived");
@@ -262,12 +272,13 @@ app.delete('/api/courses/:id', async (req, res) => {
         console.error(error.message);
         res.status(500).send('Internal Server Error');
     }
-  });
+});
 
+//get all task of a course
 app.get('/api/tasks/:courseId', async (req, res) => {
     try {
         console.log("A GET all tasks request has arrived");
-        const { courseId } = req.params; // Use req.params to get the value from the URL
+        const { courseId } = req.params;
         const tasks = await pool.query('SELECT * FROM tasks WHERE courseid = $1', [courseId]);
         res.json(tasks.rows);
     } catch (err) {
@@ -276,6 +287,7 @@ app.get('/api/tasks/:courseId', async (req, res) => {
     }
 });
 
+//add a new task
 app.post('/api/tasks', async (req, res) => {
     try {
         console.log("A post new task request has arrived");
@@ -292,6 +304,7 @@ app.post('/api/tasks', async (req, res) => {
     }
 });
 
+//update a task
 app.put('/api/tasks/:id', async (req, res) => {
   try {
       console.log("An update task request has arrived");
@@ -321,6 +334,7 @@ app.put('/api/tasks/:id', async (req, res) => {
   }
 });
 
+//delete a task
 app.delete('/api/tasks/:id', async (req, res) => {
     try {
         console.log("A delete task request has arrived");

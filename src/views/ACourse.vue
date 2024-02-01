@@ -35,8 +35,6 @@
     </tbody>
   </table>
 </div>
-
-    <!-- Form for adding a new task -->
     <div class="add-task">
       <label for="taskName">Task Name:</label>
       <input v-model="newTaskName" type="text" id="taskName" />
@@ -64,19 +62,19 @@ export default {
   },
   methods: {
     fetchInfo() {
-  fetch(`http://localhost:3000/api/courses/${this.courseId}`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      this.course = data;
-    })
-    .catch((error) => {
-      console.error('Error fetching course info:', error);
-    });
+      fetch(`http://localhost:3000/api/course/${this.courseId}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          this.course = data;
+        })
+        .catch((error) => {
+          console.error('Error fetching course info:', error);
+        });
 
 
       fetch(`http://localhost:3000/api/tasks/${this.courseId}`)
@@ -134,7 +132,6 @@ export default {
         }); 
     },
     addTask() {
-      // Implement add task functionality
       const newTask = {
         courseid: this.courseId,
         description: this.newTaskName,
@@ -149,8 +146,8 @@ export default {
       })
         .then((response) => response.json())
         .then((data) => {
-          this.tasks.push(data); // Add the new task to the local data
-          this.newTaskName = ""; // Clear input fields
+          this.tasks.push(data);
+          this.newTaskName = "";
           this.newTaskEndDate = "";
         })
         .catch((err) => console.log(err.message));

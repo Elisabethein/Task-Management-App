@@ -16,6 +16,7 @@ The motivation behind creating the this app was to write a project that could le
 - **User-Friendly Interface:** A clean and intuitive user interface for a seamless experience.
 - **Login function:** Create a user before accessing the courses.
 - **User-based to-do lists:** Every user has their own subjects and task lists.
+- **Reset user password:** Get an email to reset pw if you forget your password.
 
 ## Features to be added
 - **Time Management:** Prioritize tasks and allocate time effectively for improved time management.

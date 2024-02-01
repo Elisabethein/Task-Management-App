@@ -7,42 +7,46 @@
                 <input v-model="email" type="email" required />
                 <button type="submit">Submit</button>
             </form>
+            <p v-if="message" class="success-message">{{ message }}</p>
         </div>
     </section>
 </template>
-  
-  <script>
-  export default {
+
+<script>
+export default {
     name: 'passwordReset',
     data() {
-      return {
-        email: '',
-      };
+        return {
+            email: '',
+            message: '',
+        };
     },
     methods: {
         async requestPasswordReset() {
             try {
-            const response = await fetch('http://localhost:3000/auth/reset-password', {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: this.email }),
-            });
+                const response = await fetch('http://localhost:3000/auth/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: this.email }),
+                });
 
-            if (response.ok) {
-                // Handle success (e.g., show a message to the user)
-                console.log('Password reset email sent successfully.');
-            } else {
-                // Handle error (e.g., show an error message)
-                console.error('Failed to send password reset email.');
-            }
+                if (response.ok) {
+                    // Handle success (e.g., show a message to the user)
+                    this.message = 'Password reset email sent successfully.';
+                } else {
+                    // Handle error (e.g., show an error message)
+                    console.error('Failed to send password reset email.');
+                    this.message = ''; // Clear the message if an error occurs
+                }
             } catch (error) {
-            console.error('Error:', error.message);
+                console.error('Error:', error.message);
+                this.message = ''; // Clear the message if an error occurs
             }
         },
     },
-  };
+};
 </script>
 
 <style scoped>
@@ -86,4 +90,9 @@
   button:hover {
     background-color: #ae5d6c;
   }
+
+  .success-message {
+    font-weight: bold;
+    margin-top: 10px;
+}
 </style>

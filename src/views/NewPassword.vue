@@ -1,53 +1,59 @@
-<!-- ResetPassword.vue -->
 <template>
     <div>
-      <h1>Reset Password</h1>
-      <form @submit.prevent="resetPassword">
-        <label for="newPassword">New Password:</label>
-        <input v-model="newPassword" type="password" id="newPassword" required />
-        <button type="submit">Reset Password</button>
-        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-      </form>
+        <h1>Reset Password</h1>
+        <form @submit.prevent="resetPassword">
+            <label for="newPassword">New Password:</label>
+            <input v-model="newPassword" type="password" id="newPassword" required />
+            <button type="submit">Reset Password</button>
+            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+            <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
+        </form>
     </div>
-  </template>
+</template>
+
   
-  <script>
-  export default {
+<script>
+export default {
     data() {
-      return {
-        newPassword: '',
-        errorMessage: '',
-      };
+        return {
+            newPassword: '',
+            errorMessage: '',
+            successMessage: '',
+        };
     },
     methods: {
-      async resetPassword() {
-        const token = this.$route.params.token;
-  
-        try {
-          const response = await fetch(`http://localhost:3000/auth/reset-password/${token}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              newPassword: this.newPassword,
-            }),
-          });
-  
-          if (response.ok) {
-            this.$router.push('/login');
-          } else {
-            const errorData = await response.json();
-            console.error(errorData.error);
-            this.errorMessage = errorData.error || 'Password reset failed.';
-          }
-        } catch (error) {
-          console.error('Error resetting password:', error.message);
-        }
-      },
+        async resetPassword() {
+            const token = this.$route.params.token;
+
+            try {
+                const response = await fetch(`http://localhost:3000/auth/reset-password/${token}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        newPassword: this.newPassword,
+                    }),
+                });
+
+                if (response.ok) {
+                    this.successMessage = 'Password reset successful.';
+                    this.$router.push('/login');
+                } else {
+                    const errorData = await response.json();
+                    console.error(errorData.error);
+                    this.errorMessage = errorData.error || 'Password reset failed.';
+                    this.successMessage = ''; // Clear success message if an error occurs
+                }
+            } catch (error) {
+                console.error('Error resetting password:', error.message);
+                this.errorMessage = 'Internal Server Error';
+                this.successMessage = ''; // Clear success message if an error occurs
+            }
+        },
     },
-  };
-  </script>
+};
+</script>
 
 <style scoped>
 * {
@@ -90,4 +96,9 @@
   button:hover {
     background-color: #ae5d6c;
   }
+
+  .success-message {
+    font-weight: bold;
+    margin-top: 10px;
+}
   </style>

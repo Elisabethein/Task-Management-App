@@ -115,6 +115,7 @@
   section {
     padding-top: 20px;
     text-align: center;
+    height: 100vh;
   }
   
   .links {
