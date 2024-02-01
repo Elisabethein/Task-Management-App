@@ -21,6 +21,11 @@
           Don't have an account?
           <router-link to="/signup" class="links" active-class="links-hover">Signup</router-link>
         </p>
+        <div class = "restore">
+          <p>Forgot your password?</p>
+          <router-link to="/password" class="links" active-class="links-hover">Restore</router-link>
+        </div>
+        
       </div>
     </section>
   
@@ -159,6 +164,16 @@
     color: rgb(227, 84, 84);
     font-size: 12px;
     padding-bottom: 20px;
+  }
+
+  .restore {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .restore button {
+    width: 20%;
+    margin-left: 10px;
   }
   
   </style>

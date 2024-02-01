@@ -4,6 +4,8 @@ import ACourse from "../views/ACourse.vue";
 import SignUp from "../views/SignupPage.vue";
 import LogIn from "../views/LoginPage.vue";
 import ContactsPage from "../views/ContactsPage.vue";
+import PasswordReset from "../views/PasswordReset.vue";
+import NewPassword from "../views/NewPassword.vue";
 import auth from "../auth";
 
 const routes = [
@@ -38,6 +40,16 @@ const routes = [
     path: "/contacts",
     name: "Contacts",
     component: ContactsPage,
+  },
+  {
+    path: "/password",
+    name: "PasswordReset",
+    component: PasswordReset,
+  },
+  {
+    path: '/auth/reset-password/:token',
+    name: 'NewPassword',
+    component: NewPassword,
   },
   {
     path: '/courses',

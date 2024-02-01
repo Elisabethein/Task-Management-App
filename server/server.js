@@ -9,7 +9,8 @@ const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 3000;
 
 const app = express();
-
+const crypto = require('crypto');
+const passwordResetTokens = new Map();
 
 app.use(cors({ origin: 'http://localhost:8080', credentials: true }));
 app.use(express.json());
@@ -26,6 +27,78 @@ const generateJWT = (id) => {
 app.listen(port, () => {
     console.log("Server is listening to port " + port)
 });
+
+const nodemailer = require('nodemailer');
+
+// Configure nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // Use your email service provider
+  auth: {
+    user: 'taskmanagementapp24@gmail.com',
+    pass: 'jbey gjnj qpkd zcdg',
+  },
+});
+
+
+app.post('/auth/reset-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+  
+      const token = crypto.randomBytes(32).toString('hex');
+      passwordResetTokens.set(token, { email, used: false });
+  
+      const resetLink = `http://localhost:8080/auth/reset-password/${token}`;
+        const mailOptions = {
+        from: 'taskmanagementapp24@gmail.com', // Replace with your email address
+        to: email,
+        subject: 'Password Reset',
+        text: `Click the following link to reset your password: ${resetLink}`,
+        };
+  
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              console.error(error.message);
+              res.status(500).json({ error: 'Internal Server Error' });
+            } else {
+              console.log('Email sent: ' + info.response);
+              res.status(200).json({ message: 'Password reset email sent successfully.' });
+            }
+          });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  app.post('/auth/reset-password/:token', async (req, res) => {
+    try {
+      const { token } = req.params;
+      const { newPassword } = req.body;
+  
+      // Validate the token
+      if (!passwordResetTokens.has(token) || passwordResetTokens.get(token).used) {
+        return res.status(400).json({ error: 'Invalid or expired token.' });
+      }
+  
+      const email = passwordResetTokens.get(token);
+  
+      // Hash the new password
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+  
+      // Update the user's password in the database
+      await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
+  
+      // Remove the token from the map after it's used
+      passwordResetTokens.set(token, { email, used: true });
+  
+      res.status(200).json({ message: 'Password reset successful.' });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
 
 // is used to check whether a user is authinticated
 app.get('/auth/authenticate', async(req, res) => {
