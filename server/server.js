@@ -259,7 +259,7 @@ app.get('/api/course/:id', async(req, res) => {
 });
 
 //delete a course and all tasks in it
-app.delete('/api/courses/:id', async (req, res) => {
+app.delete('/api/course/:id', async (req, res) => {
     try {
         console.log("A delete course request has arrived");
         const { id } = req.params;

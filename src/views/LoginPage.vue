@@ -6,16 +6,16 @@
         <form class="login-form" @submit.prevent="LogIn">
           <label>
             Email
-            <input v-model="email" type="text" placeholder="Email" required/>
+            <input v-model="email" id="username" type="text" placeholder="Email" required/>
           </label>
           <label>
             Password
-            <input v-model="password" type="password" placeholder="Password" required/>
+            <input v-model="password" id="password" type="password" placeholder="Password" required/>
           </label>
           <div v-if="loginError" class="login-error">
             Wrong password/email
           </div>
-          <button @click="LogIn">Login</button>
+          <button id="login-button" @click="LogIn">Login</button>
         </form>
         <p>
           Don't have an account?

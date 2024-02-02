@@ -17,10 +17,10 @@ The motivation behind creating the this app was to write a project that could le
 - **Login function:** Create a user before accessing the courses.
 - **User-based to-do lists:** Every user has their own subjects and task lists.
 - **Reset user password:** Get an email to reset pw if you forget your password.
+- **Testing functionalities:** All basic functionalities tested with cypress: logging in, adding courses, tasks and all task management functionalities.
 
 ## Features to be added
 - **Time Management:** Prioritize tasks and allocate time effectively for improved time management.
-- **Testing functionalities**
 - **Other simple functionalities** Fixing or optimizing existing functionalities and creating new ones.
 
 

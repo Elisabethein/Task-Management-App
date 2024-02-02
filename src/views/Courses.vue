@@ -3,8 +3,8 @@
     <h1>To do list for each subject</h1>
     <div class = "add-course">
       <!-- Field for adding courses -->
-      <input v-model="newCourseName" type="text" placeholder="Enter course name" />
-      <button @click="addCourse" class="addButton">Add Course</button>
+      <input v-model="newCourseName" id="courseName" type="text" placeholder="Enter course name" />
+      <button @click="addCourse" id="add-course-button" class="addButton">Add Course</button>
     </div>
     <section class="courses-container">
       <router-link v-for="course in courses" :key="course.id" :to="{ name: 'ACourse', params: { id: course.id } }" class="course-card" :style="{ backgroundColor: getBackgroundColor() }">
