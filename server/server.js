@@ -226,23 +226,61 @@ app.get('/api/course/:courseId', async(req, res) => {
 app.post('/api/courses', async (req, res) => {
   try {
       console.log("A POST  new course request has arrived");
-      const { coursename, userId } = req.body;
-      console.log(coursename);
-      console.log(userId);
+      const { coursename, userId, colorid, colorid_dark } = req.body;
         // Validate user ID
       if (!userId) {
         return res.status(400).json({ error: 'User ID is required' });
       }
-
       const newCourse = await pool.query(
-        'INSERT INTO courses (coursename, userid) VALUES ($1, $2) RETURNING *',
-        [coursename, userId]
+        'INSERT INTO courses (coursename, userid, colorid, colorid_dark) VALUES ($1, $2, $3, $4) RETURNING *',
+        [coursename, userId, colorid, colorid_dark]
       );
       res.status(201).json(newCourse.rows[0]);
     } catch (err) {
       console.error(err.message);
     }
 });
+
+//update course background color
+app.put('/api/course/:courseId', async (req, res) => {
+    try {
+      console.log("A PUT request to update course color has arrived");
+      const { colorid } = req.body;
+      const courseId = req.params.courseId;
+      // Validate course ID and color ID
+      if (!courseId) {
+        return res.status(400).json({ error: 'Course ID is required' });
+      }
+      const updatedCourse = await pool.query(
+        'UPDATE courses SET colorid = $1 WHERE id = $2 RETURNING *',
+        [colorid, courseId]
+      );
+      res.json(updatedCourse.rows[0]);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+app.put('/api/course/dark/:courseId', async (req, res) => {
+    try {
+      console.log("A PUT request to update course color has arrived");
+      const { colorid_dark } = req.body;
+      const courseId = req.params.courseId;
+      // Validate course ID and color ID
+      if (!courseId) {
+        return res.status(400).json({ error: 'Course ID is required' });
+      }
+      const updatedCourse = await pool.query(
+        'UPDATE courses SET colorid_dark = $1 WHERE id = $2 RETURNING *',
+        [colorid_dark, courseId]
+      );
+      res.json(updatedCourse.rows[0]);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 //select a course based on id
 app.get('/api/course/:id', async(req, res) => {

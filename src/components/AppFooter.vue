@@ -1,15 +1,20 @@
 <template>
-    <div class="footer">
+    <div :class="{ 'footer': true, 'dark-theme': isDarkMode }">
       <p class="footer-text">&copy; {{ currentYear }} All rights reserved.</p>
     </div>
   </template>
   
   <script>
+  import { mapState } from 'vuex';
+
   export default {
     data() {
       return {
         currentYear: new Date().getFullYear(),
       };
+    },
+    computed: {
+    ...mapState(['isDarkMode']),
     },
   };
   </script>
@@ -35,6 +40,15 @@
 }
   .footer-text {
     color: #ae5d6c;
+  }
+
+  .dark-theme {
+    border: 1px solid #07010b;
+    background-color: #07010b;
+  }
+
+  .dark-theme .footer-text {
+    color: #eee2f8;
   }
   </style>
   

@@ -18,11 +18,11 @@ The motivation behind creating the this app was to write a project that could le
 - **User-based to-do lists:** Every user has their own subjects and task lists.
 - **Reset user password:** Get an email to reset pw if you forget your password.
 - **Testing functionalities:** All basic functionalities tested with cypress: logging in, adding courses, tasks and all task management functionalities.
+- **Choose between light or dark mode:** A simple click changes the whole application theme to either dark or light.
+- **Time Management:** Tasks are sorted based on end-date, urgent tasks have specific colour and finished tasks are displayed below others.
 
-## Features to be added
-- **Time Management:** Prioritize tasks and allocate time effectively for improved time management.
-- **Other simple functionalities** Fixing or optimizing existing functionalities and creating new ones.
-
+## Features to be added:
+- **Refactoring**
 
 ## Project setup
 ```

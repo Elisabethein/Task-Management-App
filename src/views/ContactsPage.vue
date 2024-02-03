@@ -1,5 +1,5 @@
 <template>
-    <div class="contacts">
+    <div class="contacts" :class="{ 'dark-mode': isDarkMode }">
       <header>
         <h1>Contact Information</h1>
       </header>
@@ -18,8 +18,13 @@
   </template>
   
   <script>
+  import { mapState } from 'vuex';
+
   export default {
     name: "ContactsPage",
+    computed: {
+    ...mapState(['isDarkMode']),
+    },
   };
   </script>
   
@@ -33,7 +38,6 @@
   justify-content: center;
   align-items: center;
 }
-
 .contact-details {
   display: flex;
   gap: 20px;
@@ -57,6 +61,13 @@
   transform: scale(1.05);
   transition: transform 0.2s ease-in-out;
 }
-  
+
+.dark-mode *{
+  color: #eee2f8;
+}
+
+.dark-mode .contact-item{
+  background-color: #07010b;
+}
   </style>
   

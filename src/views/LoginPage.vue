@@ -1,5 +1,5 @@
 <template>
-    <body>
+    <body :class="{ 'dark-mode': isDarkMode }">
     <section>
       <div class="container">
         <p class="single"><br>Login</p>
@@ -22,8 +22,9 @@
           <router-link to="/signup" class="links" active-class="links-hover">Signup</router-link>
         </p>
         <div class = "restore">
-          <p>Forgot your password?</p>
+          <p>Forgot your password?
           <router-link to="/password" class="links" active-class="links-hover">Restore</router-link>
+        </p>
         </div>
         
       </div>
@@ -33,7 +34,7 @@
   </template>
 
   <script>
-  import { mapActions } from 'vuex';
+  import { mapActions, mapState } from 'vuex';
   
   export default {
     name: 'LoginPage',
@@ -43,7 +44,11 @@
         password: "",
         loginError: false,
       };
-    }, methods: {
+    },
+    computed: {
+    ...mapState(['isDarkMode']),
+    },
+    methods: {
       ...mapActions(['loginUser']),
       async LogIn() {
         console.log("LogIn method is called");
@@ -73,6 +78,8 @@
             console.log("Authentication successful");
 
             await this.loginUser(responseData.user_id);
+
+            localStorage.setItem('userId', responseData.user_id);
 
             this.$router.push("/courses");
             console.log("Navigating to /courses");
@@ -106,7 +113,6 @@
     padding: 10px 10px 10px;
     max-width: 600px;
     margin: 40px auto 75px;
-    background-color: #D1DEDE;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     background-color: #FADDE1;
@@ -177,5 +183,25 @@
     margin-left: 10px;
   }
   
+
+  .dark-mode .container{
+    background-color: #07010b;
+  }
+
+  .dark-mode * {
+    color: #eee2f8;
+  }
+
+  .dark-mode button{
+    background-color: #1b042b;
+  }
+
+  .dark-mode button:hover{
+    background-color: #2d0748;
+  }
+  
+  .dark-mode .links:hover {
+    color: #9c8fa8;
+  }
   </style>
   

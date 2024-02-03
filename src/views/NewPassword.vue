@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :class="{ 'dark-mode': isDarkMode }">
         <h1>Reset Password</h1>
         <form @submit.prevent="resetPassword">
             <label for="newPassword">New Password:</label>
@@ -13,6 +13,7 @@
 
   
 <script>
+import { mapState } from 'vuex';
 export default {
     data() {
         return {
@@ -20,6 +21,9 @@ export default {
             errorMessage: '',
             successMessage: '',
         };
+    },
+    computed: {
+    ...mapState(['isDarkMode']),
     },
     methods: {
         async resetPassword() {
@@ -72,7 +76,6 @@ export default {
     padding: 10px 10px 10px;
     max-width: 600px;
     margin: 40px auto 75px;
-    background-color: #D1DEDE;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     background-color: #FADDE1;
@@ -101,4 +104,17 @@ export default {
     font-weight: bold;
     margin-top: 10px;
 }
+.dark-mode .container{
+    background-color: #07010b;
+  }
+  .dark-mode *{
+    color: #eee2f8;
+  }
+  .dark-mode button{
+    background-color: #1b042b;
+  }
+
+  .dark-mode button:hover{
+    background-color: #2d0748;
+  }
   </style>

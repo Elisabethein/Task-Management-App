@@ -1,5 +1,5 @@
 <template>
-  <body>
+  <body :class="{ 'dark-mode': isDarkMode }">
     <section>
       <div class="container">
         <p class="single"><br>Create a new account</p>
@@ -25,7 +25,6 @@
           </div>
   
           <button type="submit" :disabled="!isPasswordValid">Signup</button>
-          
           <!-- Display error message if email is already taken -->
           <div v-if="signupError" class="signup-error">
             {{ signupError }}
@@ -41,7 +40,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 
 export default {
   name: "SignUp",
@@ -59,8 +58,11 @@ export default {
         {name: 'start with an uppercase character', regex: /^[A-Z].*/},
         {name: 'include the character “_"', regex: /^(?=.*_)/},
       ],
-      signupError: null, // Added for error handling
+      signupError: null,
     };
+  },
+  computed: {
+    ...mapState(['isDarkMode']),
   },
   methods: {
     ...mapActions(['loginUser']),
@@ -93,9 +95,11 @@ export default {
           
           if (response.ok) {
             await this.loginUser(responseData.user_id);
+
+            localStorage.setItem('userId', responseData.user_id);
+            
             this.$router.push("/");
           } else {
-            // Handle signup error
             this.signupError = responseData.error;
           }
         } else {
@@ -227,6 +231,25 @@ export default {
   font-size: 12px;
   padding-top: 10px;
 }
+.dark-mode .container{
+    background-color: #07010b;
+  }
+
+  .dark-mode * {
+    color: #eee2f8;
+  }
+
+  .dark-mode button{
+    background-color: #1b042b;
+  }
+
+  .dark-mode button:hover{
+    background-color: #2d0748;
+  }
+  
+  .dark-mode .links:hover {
+    color: #9c8fa8;
+  }
   
   </style>
   

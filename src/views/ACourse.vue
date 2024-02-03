@@ -1,40 +1,44 @@
 <template>
+  <div :class="{ 'dark-mode': isDarkMode }">
   <div class="ACourse">
     <div class="course-header">
-    <h1>{{ this.course ? this.course.coursename : "A course" }}</h1>
-    <button @click="deleteCourse(this.course.id)" class="delete-button">
+      <h1>{{ this.course ? this.course.coursename : "A course" }}</h1>
+      <button @click="deleteCourse(this.course.id)" class="delete-button">
         <img src="@/assets/trash.png" alt="Delete Course">
-    </button>
+      </button>
+      <router-link to="/" class="links" active-class="links-hover">
+        <button class="back-button">Back</button>
+      </router-link>
     </div>
     <div v-if="tasks.length > 0">
-  <table class="task-table">
-    <thead>
-      <tr>
-        <th class="task-description">Task Name</th>
-        <th class="task-end-date">End Date</th>
-        <th class="task-actions">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="task in tasks" :key="task.id">
-        <td :style="{ 'text-decoration': task.crossedout ? 'line-through' : 'none' }">
-          <span v-if="!editing">{{ task.description }}</span>
-          <input v-else name="description" id="description" type="text" required v-model="task.description">
-        </td>
-        <td>
-          <span v-if="!editing">{{ task.end_date }}</span>
-          <input v-else name="end_date" id="end_date" type="text" required v-model="task.end_date">
-        </td>
-        <td>
-          <button @click="crossOutTask(task)" :class="{ 'red': task.crossedOut }">Cross Out</button>
-          <button @click="deleteTask(task)">Delete</button>
-          <button @click="editTask()">Edit</button>
-          <button @click="updateTask(task.id, task)">Update</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+      <table class="task-table">
+        <thead>
+          <tr>
+            <th class="task-description">Task Name</th>
+            <th class="task-end-date">End Date</th>
+            <th class="task-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="task in sortedTasks" :key="task.id">
+            <td :style="{ 'text-decoration': task.crossedout ? 'line-through' : 'none' }">
+              <span v-if="!editing">{{ task.description }}</span>
+              <input v-else name="description" id="description" type="text" required v-model="task.description">
+            </td>
+            <td :class="{ 'urgent-end-date': isEndDateUrgent(task.end_date) }">
+              <span v-if="!editing">{{ task.end_date }}</span>
+              <input v-else name="end_date" id="end_date" type="text" required v-model="task.end_date">
+            </td>
+            <td>
+              <button @click="crossOutTask(task)" :class="{ 'red': task.crossedOut }">Cross Out</button>
+              <button @click="deleteTask(task)">Delete</button>
+              <button @click="editTask()">Edit</button>
+              <button @click="updateTask(task.id, task)">Update</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <div class="add-task">
       <label for="taskName">Task Name:</label>
       <input v-model="newTaskName" type="text" id="taskName" />
@@ -45,9 +49,12 @@
       <button @click="addTask">Add Task</button>
     </div>
   </div>
+</div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   name: "ACourse",
   data() {
@@ -94,9 +101,6 @@ export default {
           body: JSON.stringify( {"id": id, "description": task.description, "end_date": task.end_date}),
         })
           .then((response) => response.json())
-          .then((data) => {
-            window.location.reload();
-          })
           .catch((err) => console.log(err.message));
     },
     crossOutTask(task) {
@@ -164,6 +168,27 @@ export default {
           console.log(e);
         }); 
     },
+    isEndDateUrgent(endDate) {
+    const timeDifference = new Date(endDate).getTime() - new Date().getTime();
+    const daysDifference = timeDifference / (1000 * 3600 * 24);
+    return daysDifference < 2;
+  },
+  },
+  computed: {
+    sortedTasks() {
+      return this.tasks.slice().sort((a, b) => {
+        if (a.crossedout && !b.crossedout) {
+          return 1;
+        } else if (!a.crossedout && b.crossedout) {
+          return -1;
+        }
+        const dateA = new Date(a.end_date);
+        const dateB = new Date(b.end_date);
+
+        return dateA - dateB;
+      });
+    },
+    ...mapState(['isDarkMode']),
   },
   mounted() {
     this.courseId = this.$route.params.id;
@@ -174,13 +199,18 @@ export default {
 </script>
 
 <style scoped>
+*{
+  color: #7d3541;
+}
 .ACourse {
   width: 60%;
   justify-content: center;
   margin: auto;
   padding: 10px;
-  color: #7d3541;
   height: 100vh;
+}
+.dark-mode *{
+  color: #eee2f8;
 }
 
 .course-header {
@@ -206,18 +236,22 @@ export default {
   background-color: #FADDE1;
 }
 
+.dark-mode .task-table th {
+  background-color: #1b042b;
+}
+
 button {
   margin-right: 8px;
   padding: 6px 10px;
   color: white;
   border: none;
   cursor: pointer;
-  background-color: #ae5d6c; /* Set the desired background color */
-  transition: background-color 0.3s ease; /* Add a smooth transition effect */
+  background-color: #ae5d6c;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: #7d3541; /* Change the background color on hover */
+  background-color: #7d3541; 
 }
 
 .task-table .red {
@@ -225,15 +259,15 @@ button:hover {
 }
 
 .task-description {
-  width: 35%; /* Adjust the width of the task description column */
+  width: 35%;
 }
 
 .task-end-date {
-  width: 15%; /* Adjust the width of the end date column */
+  width: 15%;
 }
 
 .add-task input{
-  margin-right: 60px; /* Add margin between the input fields */
+  margin-right: 60px;
   margin-bottom: 20px;
   min-width: 200px;
 }
@@ -248,5 +282,26 @@ button:hover {
   border: none;
   cursor: pointer;
   padding: 0;
+  margin-left: 10px;
 }
+
+.dark-mode .delete-button {
+  background-color: #eee2f8;
+}
+
+.dark-mode button{
+    background-color: #1b042b;
+  }
+
+  .dark-mode button:hover{
+    background-color: #2d0748;
+  }
+  .dark-mode input{
+    color: #1b042b;
+  }
+
+.urgent-end-date {
+    background-color: rgb(195, 55, 55);
+    color: #FADDE1;
+  }
 </style>
