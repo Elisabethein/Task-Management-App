@@ -12,7 +12,7 @@ if (storedUserId) {
 }
 
 if (storedMode) {
-  store.dispatch('toggleDarkMode', storedMode === 'dark');
+  store.commit('setIsDarkMode', storedMode === 'dark'); // Commit directly to mutation
 }
 
 createApp(App).use(store).use(router).mount('#app')

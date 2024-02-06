@@ -15,6 +15,7 @@ export default createStore({
     },
     setIsDarkMode(state, isDarkMode) {
       state.isDarkMode = isDarkMode;
+      localStorage.setItem('mode', isDarkMode ? 'dark' : 'light'); // Update local storage
     },
   },
   actions: {
